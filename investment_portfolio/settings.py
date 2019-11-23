@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'user.apps.UserConfig',
     'finance.apps.FinanceConfig',
     'rest_framework',
     'django.contrib.admin',

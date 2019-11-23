@@ -1,50 +1,17 @@
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-
 # COMMON VALIDATORS:
-from user.models import Users
 
-zero_to_one = [MinValueValidator(0, message="Should be between 0 to 1)"), MaxValueValidator(1, message="Should be between 0 to 1")]
+zero_to_one = [MinValueValidator(0, message="Should be between 0 to 1)"),
+               MaxValueValidator(1, message="Should be between 0 to 1")]
+
+
 # Create your models here.
 
-class Stocks(models.Model):
-    """
-    a table that contains all the stocks and compatible risk. is updated once and than manually
-    """
-    symbol = models.CharField(max_length=10, primary_key=True)
-    stack_name = models.CharField(max_length=70)
-    # sector = models.CharField(max_length= 70)
-    type = models.CharField(max_length=70)  # todo give choises
-    risk_factor = models.CharField(max_length=70)  # I decide according to type #todo sort according to type
 
-
-class HistoricalRates(models.Model):
-    """
-    all the rates of the stocks and dividend. Is updated one per day
-    """
-    symbol = models.ForeignKey(Stocks, models.CASCADE)
-    date = models.DateField(auto_now=False, auto_now_add=False)
-    open_price = models.FloatField()
-    high_price = models.FloatField()
-    low_price = models.FloatField()
-    close_price = models.FloatField()
-    adj_close_price = models.FloatField()
-    dividend_paid = models.FloatField()
-
-
-class CurrentRates(models.Model):
-    """
-    all the rates of the stocks now. Is updated every min
-    """
-    symbol = models.ForeignKey(Stocks, models.CASCADE)
-    current_price = models.FloatField()
-    day_change = models.FloatField()
-    day_change_percentage = models.FloatField()
-    # volume = models.IntegerField()
-
-
-class OptimalPortfolios(models.Model):
+class OptimalPortfolio(models.Model):
     '''
         updated once by admin but every user can make his own and add
     '''
@@ -72,6 +39,51 @@ class OptimalPortfolios(models.Model):
     # todo validation that sum = 1
 
 
+class InvestmentUser(User):
+    '''
+        all users .is updated when a new user subscribes and in the settings page of every user
+    '''
+    optimal_portfolio = models.ForeignKey(OptimalPortfolio, on_delete=models.SET_NULL, null=True)
+    daily_commission_percentage = models.FloatField(default=0)
+    daily_commission_const = models.FloatField(default=0)
+    ending_date_for_commission_contract = models.DateField(auto_now=False, auto_now_add=False)
+
+
+class Stock(models.Model):
+    """
+    a table that contains all the stocks and compatible risk. is updated once and than manually
+    """
+    symbol = models.CharField(max_length=10, primary_key=True)
+    stack_name = models.CharField(max_length=70)
+    # sector = models.CharField(max_length= 70)
+    type = models.CharField(max_length=70)  # todo give choises
+    risk_factor = models.CharField(max_length=70)  # I decide according to type #todo sort according to type
+
+
+class HistoricalRate(models.Model):
+    """
+    all the rates of the stocks and dividend. Is updated one per day
+    """
+    symbol = models.ForeignKey(Stock, models.CASCADE)
+    date = models.DateField(auto_now=False, auto_now_add=False)
+    open_price = models.FloatField()
+    high_price = models.FloatField()
+    low_price = models.FloatField()
+    close_price = models.FloatField()
+    adj_close_price = models.FloatField()
+    dividend_paid = models.FloatField()
+
+
+class CurrentRate(models.Model):
+    """
+    all the rates of the stocks now. Is updated every min
+    """
+    symbol = models.ForeignKey(Stock, models.CASCADE)
+    current_price = models.FloatField()
+    day_change = models.FloatField()
+    day_change_percentage = models.FloatField()
+    # volume = models.IntegerField()
+
 
 '''
 class CurrentPortfolios(models.Model):  #todo is needed?
@@ -93,8 +105,8 @@ class PortfolioManagement(models.Model):
     '''
     all user purchases.is updated by the user on every perchase and every sell
     '''
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    symbol = models.ForeignKey(Stocks, on_delete=models.CASCADE)
+    user = models.ForeignKey(InvestmentUser, on_delete=models.CASCADE)
+    symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
     amount_bought = models.IntegerField()  # todo - if only part of the amount is sold
     is_active = models.BooleanField(default=0)
     purchase_date = models.DateField(auto_now=False, auto_now_add=False)
@@ -105,11 +117,12 @@ class PortfolioManagement(models.Model):
     # action = models.CharField(max_length=10)
 
 
-class QuarterlyCommissions(models.Model):
+class QuarterlyCommission(models.Model):
     '''
         all user anual commisions.is updated every quarter/month when comission is paid
     '''
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    user = models.ForeignKey(InvestmentUser, on_delete=models.CASCADE)
     commission_date = models.DateField(auto_now=False, auto_now_add=False)
     commission_paid = models.FloatField()
+
 # todo - think if per stock or not
