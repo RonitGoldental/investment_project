@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -39,15 +39,14 @@ class OptimalPortfolio(models.Model):
     # todo validation that sum = 1
 
 
-class InvestmentUser(models.Model):
+class InvestmentUser(AbstractUser):
     '''
         all users .is updated when a new user subscribes and in the settings page of every user
     '''
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     optimal_portfolio = models.ForeignKey(OptimalPortfolio, on_delete=models.SET_NULL, null=True)
     daily_commission_percentage = models.FloatField(default=0)
     daily_commission_const = models.FloatField(default=0)
-    ending_date_for_commission_contract = models.DateField(auto_now=False, auto_now_add=False)
+    ending_date_for_commission_contract = models.DateField(auto_now=False, auto_now_add=False, null=True)
 
 
 class Stock(models.Model):
