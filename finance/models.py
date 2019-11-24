@@ -39,10 +39,11 @@ class OptimalPortfolio(models.Model):
     # todo validation that sum = 1
 
 
-class InvestmentUser(User):
+class InvestmentUser(models.Model):
     '''
         all users .is updated when a new user subscribes and in the settings page of every user
     '''
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     optimal_portfolio = models.ForeignKey(OptimalPortfolio, on_delete=models.SET_NULL, null=True)
     daily_commission_percentage = models.FloatField(default=0)
     daily_commission_const = models.FloatField(default=0)
@@ -113,7 +114,7 @@ class PortfolioManagement(models.Model):
     purchase_commission = models.FloatField(default=0)
     purchase_price = models.FloatField()
     sell_commission = models.FloatField(default=0)
-    sale_date = models.DateField(auto_now=False, auto_now_add=False)
+    sale_date = models.DateField(auto_now=False, auto_now_add=False, null=True)
     # action = models.CharField(max_length=10)
 
 
