@@ -6,7 +6,6 @@ from rest_framework import serializers
 class InvestmentUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvestmentUser
-        # exclude = ['password']
         fields = '__all__'
 
 class OptimalPortfolioSerializer(serializers.ModelSerializer):
@@ -30,6 +29,7 @@ class CurrentRateSerializer(serializers.ModelSerializer):
 class HistoricalRateSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistoricalRate
+        user = serializers.ReadOnlyField(source='user.username')
         fields = '__all__'
 
 '''

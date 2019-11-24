@@ -30,8 +30,8 @@ class PortfolioManagementList(generics.ListCreateAPIView):
     serializer_class = PortfolioManagementSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=self.request.user)
+    def perform_create(self, serializer):
+         serializer.save(owner=self.request.user)
 
 
 class PortfolioManagementDetail(generics.RetrieveUpdateDestroyAPIView):
