@@ -40,7 +40,7 @@ class QuarterlyCommissionSerializer(serializers.ModelSerializer):
 '''
 
 class PortfolioManagementSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = PortfolioManagement
-        user = serializers.ReadOnlyField(source='user.username')
         fields = '__all__'
