@@ -105,7 +105,7 @@ class PortfolioManagement(models.Model):
     '''
     all user purchases.is updated by the user on every perchase and every sell
     '''
-    owner = models.ForeignKey(InvestmentUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(InvestmentUser, on_delete=models.CASCADE)
     symbol = models.ForeignKey(Stock, on_delete=models.CASCADE)
     amount_bought = models.IntegerField()  # todo - if only part of the amount is sold
     is_active = models.BooleanField(default=0)
