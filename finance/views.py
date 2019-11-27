@@ -6,41 +6,39 @@ from rest_framework.decorators import api_view
 from finance.models import InvestmentUser, PortfolioManagement, Stock
 from finance.permissions import IsOwnerOrReadOnly
 from finance.serializers import InvestmentUserSerializer, PortfolioManagementSerializer, StockSerializer
+from rest_framework import viewsets
+from rest_framework.response import Response
 
-
-class InvestmentUserList(generics.ListCreateAPIView):
+class InvestmentUserSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
     queryset = InvestmentUser.objects.all()
     serializer_class = InvestmentUserSerializer
 
-
-class InvestmentUsertDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = InvestmentUser.objects.all()
-    serializer_class = InvestmentUserSerializer
-
-
-class StockList(generics.ListCreateAPIView):
+class StockSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset automatically provides `list` and `detail` actions.
+    """
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
 
+class PortfolioManagementSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` and `destroy` actions.
 
-class StockDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Stock.objects.all()
-    serializer_class = StockSerializer
-
-
-class PortfolioManagementList(generics.ListCreateAPIView):
+    Additionally we also provide an extra `highlight` action.
+    """
     queryset = PortfolioManagement.objects.all()
     serializer_class = PortfolioManagementSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 
-class PortfolioManagementDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = PortfolioManagement.objects.all()
-    serializer_class = PortfolioManagementSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
 
 
 @api_view(['GET'])
