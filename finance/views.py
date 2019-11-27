@@ -9,14 +9,14 @@ from finance.serializers import InvestmentUserSerializer, PortfolioManagementSer
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-class InvestmentUserSet(viewsets.ReadOnlyModelViewSet):
+class InvestmentUserSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
     queryset = InvestmentUser.objects.all()
     serializer_class = InvestmentUserSerializer
 
-class StockSet(viewsets.ReadOnlyModelViewSet):
+class StockSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
@@ -39,12 +39,3 @@ class PortfolioManagementSet(viewsets.ModelViewSet):
 
 
 
-
-
-@api_view(['GET'])
-def api_root(request, format=None):
-    return Response({
-        'users': reverse('user-list', request=request, format=format),
-        'portfolio management': reverse('portfolio-management-log', request=request, format=format),
-        'stocks': reverse('stock-list', request=request, format=format)
-    })
