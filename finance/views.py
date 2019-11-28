@@ -4,7 +4,7 @@ from rest_framework.reverse import reverse
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from finance.models import InvestmentUser, PortfolioManagement, Stock
-from finance.permissions import IsOwnerOrReadOnly
+from finance.permissions import IsOwnerOrReadOnly, IsUserOrReadOnly
 from finance.serializers import InvestmentUserSerializer, PortfolioManagementSerializer, StockSerializer
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -14,6 +14,8 @@ class InvestmentUserSet(viewsets.ModelViewSet):
     This viewset automatically provides `list` and `detail` actions.
     """
     queryset = InvestmentUser.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsUserOrReadOnly] #todo is super user or..
     serializer_class = InvestmentUserSerializer
 
 class StockSet(viewsets.ModelViewSet):
@@ -22,6 +24,7 @@ class StockSet(viewsets.ModelViewSet):
     """
     queryset = Stock.objects.all()
     serializer_class = StockSerializer
+    # permission_classes = [permissions.ReadOnly] #todo
 
 class PortfolioManagementSet(viewsets.ModelViewSet):
     """
