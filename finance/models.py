@@ -73,6 +73,9 @@ class HistoricalRate(models.Model):
     adj_close_price = models.FloatField()
     dividend_paid = models.FloatField()
 
+    def last_updated(self):
+        pass
+
 
 class CurrentRate(models.Model):
     """
