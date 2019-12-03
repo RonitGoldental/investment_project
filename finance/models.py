@@ -53,9 +53,9 @@ class Stock(models.Model):
     """
     a table that contains all the stocks and compatible risk. is updated once and than manually
     """
-    symbol = models.CharField(max_length=10, primary_key=True)
-    stack_name = models.CharField(max_length=70)
     # sector = models.CharField(max_length= 70)
+    symbol = models.CharField(max_length=10, primary_key=True)
+    stock_name = models.CharField(max_length=70)
     type = models.CharField(max_length=70)  # todo give choises
     risk_factor = models.CharField(max_length=70)  # I decide according to type #todo sort according to type
 
@@ -73,8 +73,9 @@ class HistoricalRate(models.Model):
     adj_close_price = models.FloatField()
     dividend_paid = models.FloatField()
 
-    def last_updated(self):
-        pass
+    def __str__(self):
+        return self.symbol+" "+"self.date"
+
 
 
 class CurrentRate(models.Model):
@@ -86,6 +87,9 @@ class CurrentRate(models.Model):
     day_change = models.FloatField()
     day_change_percentage = models.FloatField()
     # volume = models.IntegerField()
+
+    def __str__(self):
+        return self.symbol
 
 
 '''
