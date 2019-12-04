@@ -59,6 +59,8 @@ class Stock(models.Model):
     type = models.CharField(max_length=70)  # todo give choises
     risk_factor = models.CharField(max_length=70)  # I decide according to type #todo sort according to type
 
+    def __str__(self):
+        return self.symbol
 
 class HistoricalRate(models.Model):
     """
@@ -73,8 +75,8 @@ class HistoricalRate(models.Model):
     adj_close_price = models.FloatField()
     dividend_paid = models.FloatField()
 
-    def __str__(self):
-        return self.symbol+" "+"self.date"
+    # def __str__(self):
+    #     return self.symbol+" "+"self.date"
 
 
 
@@ -89,7 +91,7 @@ class CurrentRate(models.Model):
     # volume = models.IntegerField()
 
     def __str__(self):
-        return self.symbol
+        return self.symbol_id
 
 
 '''

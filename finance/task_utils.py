@@ -57,7 +57,7 @@ def task3(request):
     response = requests.get(request)
     current_status_dict = {}
     soup = BeautifulSoup(response.content, "html.parser")
-    # current_status_dict['symbol'] = get_symbol(soup)
+    current_status_dict['symbol'] = get_symbol(soup)
     day_changes = soup.findAll("span", class_=["Trsdu(0.3s)"])
     current_status_dict['current_price'] = day_changes[0].get_text()
     day_change, day_change_percentage = day_changes[1].get_text().split(" ")
@@ -68,13 +68,14 @@ def task3(request):
 
 def update_current_rate(symbol,current_status_dict):
     try:
-        obj = CurrentRate.objects.get(symbol=symbol)
+        obj = CurrentRate.objects.get(symbol=current_status_dict['symbol'])
+        obj.current_price = current_status_dict['current_price']
+        obj.day_change = current_status_dict['day_change']
+        obj.day_change_percentage = current_status_dict['day_change_percentage']
+        obj.save()
     except ObjectDoesNotExist as e:
         CurrentRate.objects.create(symbol_id=symbol, **current_status_dict)
-    obj = CurrentRate.objects.get(symbol=symbol)
-    obj.current_price =current_status_dict['current_price']
-    obj.day_change=current_status_dict['day_change']
-    obj.day_change_percentage=current_status_dict['day_change_percentage']
+
 
 
 # table_data,symbol = task1('https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI')
@@ -87,5 +88,6 @@ def update_current_rate(symbol,current_status_dict):
 # list_of_dicts = task2(table_data,symbol)
 # print(list_of_dicts)
 
-update_current_rate('AA',task3("https://finance.yahoo.com/quote/VOO?p=VOO"))
+update_current_rate('VOO',task3("https://finance.yahoo.com/quote/VOO?p=VOO"))
+
 print("end")
