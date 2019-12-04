@@ -59,8 +59,8 @@ class Stock(models.Model):
     type = models.CharField(max_length=70)  # todo give choises
     risk_factor = models.CharField(max_length=70)  # I decide according to type #todo sort according to type
 
-    def __str__(self):
-        return self.symbol
+    # def __str__(self):
+    #     return self.symbol
 
 class HistoricalRate(models.Model):
     """
@@ -73,7 +73,7 @@ class HistoricalRate(models.Model):
     low_price = models.FloatField()
     close_price = models.FloatField()
     adj_close_price = models.FloatField()
-    dividend_paid = models.FloatField()
+    dividend_paid = models.FloatField(default=0)
 
     # def __str__(self):
     #     return self.symbol+" "+"self.date"
@@ -83,7 +83,7 @@ class HistoricalRate(models.Model):
 class CurrentRate(models.Model):
     """
     all the rates of the stocks now. Is updated every min
-    """
+    """ # todo datetime
     symbol = models.ForeignKey(Stock, models.CASCADE)
     current_price = models.FloatField()
     day_change = models.FloatField()
