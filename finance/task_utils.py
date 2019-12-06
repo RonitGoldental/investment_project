@@ -135,11 +135,22 @@ def get_hist_data(request):
         i += 1
     return list_of_hist_rates
 
+
+def update_historical_dividends(request):
+    response = requests.get(request)
+    data = json.loads(response.text)
+    for date in list((data['chart']['result'][0]['events']['dividends'].keys())):
+        date_to_update = datetime.fromtimestamp(int(date)).date()
+        obj = HistoricalRate.objects.get(date=date_to_update)
+        obj.dividend_amount = data['chart']['result'][0]['events']['dividends'][date]['amount']
+        obj.save() #todo bulk update
+
+
 def func_to_time():
     request ="https://query2.finance.yahoo.com/v8/finance/chart/VTI?formatted=true&crumb=0ZXdu.gWVfg&lang=en-US&region=US&interval=1d&period1=992552400&period2=1575583200&events=div%7Csplit&corsDomain=finance.yahoo.com"
     HistoricalRate.objects.all().delete()
     update_historical_rates_bulk_insert(get_hist_data(request))
-
+    update_historical_dividends(request)
 
 func_to_time()
 
