@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 # COMMON VALIDATORS:
+from django.utils import timezone
 
 zero_to_one = [MinValueValidator(0, message="Should be between 0 to 1)"),
                MaxValueValidator(1, message="Should be between 0 to 1")]
@@ -73,7 +76,7 @@ class HistoricalRate(models.Model):
     low_price = models.FloatField()
     close_price = models.FloatField()
     adj_close_price = models.FloatField()
-    dividend_paid = models.FloatField(default=0)
+    dividend_amount = models.FloatField(default=0)
 
     # def __str__(self):
     #     return self.symbol+" "+"self.date"
@@ -84,6 +87,7 @@ class CurrentRate(models.Model):
     """
     all the rates of the stocks now. Is updated every min
     """ # todo datetime
+    time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now())
     symbol = models.ForeignKey(Stock, models.CASCADE)
     current_price = models.FloatField()
     day_change = models.FloatField()
