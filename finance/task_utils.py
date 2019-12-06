@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
+import timeit
 
 # django setup
 import os
@@ -13,11 +14,33 @@ from finance.models import CurrentRate, HistoricalRate
 
 
 def get_symbol(soup):
-    name = soup.select(
-        "#quote-header-info > div.Mt\(15px\) > div.D\(ib\).Mt\(-5px\).Mend\(20px\).Maw\(56\%\)--tab768.Maw\(52\%\).Ov\(h\).smartphone_Maw\(85\%\).smartphone_Mend\(0px\) > div.D\(ib\) > h1")[
-        0].get_text()
+    name = soup.select("#quote-header-info > div.Mt\(15px\) > div.D\(ib\).Mt\(-5px\).Mend\(20px\).Maw\(56\%\)--tab768.Maw\(52\%\).Ov\(h\).smartphone_Maw\(85\%\).smartphone_Mend\(0px\) > div.D\(ib\) > h1")[0].get_text()
     symbol = name.split()[0]
     return symbol
+
+def get_current_rates(request):
+    response = requests.get(request)
+    current_status_dict = {}
+    soup = BeautifulSoup(response.content, "html.parser")
+    current_status_dict['symbol_id'] = get_symbol(soup)
+    day_changes = soup.findAll("span", class_=["Trsdu(0.3s)"])
+    current_status_dict['current_price'] = day_changes[0].get_text()
+    day_change, day_change_percentage = day_changes[1].get_text().split(" ")
+    current_status_dict['day_change'] = day_change
+    current_status_dict['day_change_percentage'] = day_change_percentage[1:-2]
+    return current_status_dict
+
+
+def update_current_rate(current_status_dict):
+    try:
+        stock = CurrentRate.objects.get(symbol_id=current_status_dict['symbol_id'])
+        stock.current_price = current_status_dict['current_price']
+        stock.day_change = current_status_dict['day_change']
+        stock.day_change_percentage = current_status_dict['day_change_percentage']
+        stock.save()
+    except ObjectDoesNotExist as e:
+        CurrentRate.objects.create(**current_status_dict)
+
 
 def get_historical_rates(request):
     response = requests.get(request)
@@ -50,40 +73,38 @@ def get_historical_rates(request):
     return list_of_hist_rates
 
 
-def get_current_rates(request):
-    response = requests.get(request)
-    current_status_dict = {}
-    soup = BeautifulSoup(response.content, "html.parser")
-    current_status_dict['symbol_id'] = get_symbol(soup)
-    day_changes = soup.findAll("span", class_=["Trsdu(0.3s)"])
-    current_status_dict['current_price'] = day_changes[0].get_text()
-    day_change, day_change_percentage = day_changes[1].get_text().split(" ")
-    current_status_dict['day_change'] = day_change
-    current_status_dict['day_change_percentage'] = day_change_percentage[1:-2]
-    return current_status_dict
+# def update_historical_rates(list_of_hist_rates):
+#     try:
+#         last_update = HistoricalRate.objects.get(symbol_id=list_of_hist_rates[0]['symbol_id'])
+#     except ObjectDoesNotExist as e:
+#         for date_info in list_of_hist_rates:
+#             if 'close_price' in date_info:
+#                 HistoricalRate.objects.create(**date_info)
 
-
-def update_current_rate(current_status_dict):
-    try:
-        stock = CurrentRate.objects.get(symbol_id=current_status_dict['symbol_id'])
-        stock.current_price = current_status_dict['current_price']
-        stock.day_change = current_status_dict['day_change']
-        stock.day_change_percentage = current_status_dict['day_change_percentage']
-        stock.save()
-    except ObjectDoesNotExist as e:
-        CurrentRate.objects.create(**current_status_dict)
-
-def update_historical_rates(list_of_hist_rates):
+def update_historical_rates_bulk_insert(list_of_hist_rates):
     try:
         last_update = HistoricalRate.objects.get(symbol_id=list_of_hist_rates[0]['symbol_id'])
     except ObjectDoesNotExist as e:
+        list_of_obj = []
         for date_info in list_of_hist_rates:
             if 'close_price' in date_info:
-                HistoricalRate.objects.create(**date_info)
+                obj = HistoricalRate(**date_info)
+                list_of_obj.append(obj)
+        HistoricalRate.objects.bulk_create(list_of_obj)
 
 
 
-update_current_rate(get_current_rates("https://finance.yahoo.com/quote/BND?p=BND&.tsrc=fin-srch"))
-update_current_rate(get_current_rates("https://finance.yahoo.com/quote/VOO?p=VOO&.tsrc=fin-srch"))
-update_historical_rates(get_historical_rates("https://finance.yahoo.com/quote/VOO/history?p=VOO"))
-print("end")
+# update_current_rate(get_current_rates("https://finance.yahoo.com/quote/BND?p=BND&.tsrc=fin-srch"))
+# update_current_rate(get_current_rates("https://finance.yahoo.com/quote/VOO?p=VOO&.tsrc=fin-srch"))
+hist_rates =get_historical_rates("https://finance.yahoo.com/quote/VOO/history?p=VOO")
+# update_historical_rates_bulk_insert(hist_rates)
+HistoricalRate.objects.all().delete()
+# def func_to_time():
+#     update_historical_rates(hist_rates)
+#     HistoricalRate.objects.all().delete()
+
+# def func_to_time():
+#     update_historical_rates_bulk_insert(hist_rates)
+#     HistoricalRate.objects.all().delete()
+# print(timeit.timeit(func_to_time, number=10))
+
