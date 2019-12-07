@@ -70,7 +70,7 @@ class HistoricalRate(models.Model):
     all the rates of the stocks and dividend. Is updated one per day
     """
     symbol = models.ForeignKey(Stock, models.CASCADE)
-    date = models.DateField(auto_now=False, auto_now_add=False)
+    trading_date = models.DateField(auto_now=False, auto_now_add=False)
     open_price = models.FloatField()
     high_price = models.FloatField()
     low_price = models.FloatField()
@@ -78,8 +78,8 @@ class HistoricalRate(models.Model):
     adj_close_price = models.FloatField()
     dividend_amount = models.FloatField(default=0)
 
-    # def __str__(self):
-    #     return self.symbol+" "+"self.date"
+    def __str__(self):
+        return self.symbol_id+" "+str(self.trading_date)
 
 
 
@@ -87,7 +87,7 @@ class CurrentRate(models.Model):
     """
     all the rates of the stocks now. Is updated every min
     """ # todo datetime
-    time = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now())
+    time_updated = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now())
     symbol = models.ForeignKey(Stock, models.CASCADE)
     current_price = models.FloatField()
     day_change = models.FloatField()
